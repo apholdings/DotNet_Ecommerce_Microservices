@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProductAPI.Models;
 using ProductAPI.Models.DTO.ProductDtos;
+using ProductAPI.Repository;
 using ProductAPI.Repository.IRepository;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
@@ -28,69 +30,40 @@ namespace ProductAPI.Controllers.v1
 		}
 
 
-		private readonly IList<string> _validSortColumns = new List<string> { "owner", "name", "priceRange", "category", "onSale", "averageRating" };
+		private readonly IList<string> _validSortColumns = new List<string> { "Owner", "Name", "Price", "Category", "OnSale", "AverageRating" };
 
 		[HttpGet]
 		[ResponseCache(CacheProfileName = "Default60")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		public async Task<ActionResult<APIResponse>> GetAll([FromQuery] Pagination pagination, [Required] string sortColumn, bool sortOrder = false)
+		public async Task<IActionResult> Index(int pageSize = 10, int pageNumber = 1, string sortColumn = "Name", bool sortOrder = true)
 		{
-			// Validate the pagination object
-			if (!ModelState.IsValid)
+			// Use the sortColumn field to filter and order the results
+			var totalItems = await _dbProducts.CountAsync();
+			var pagination = new Pagination
 			{
-				_response.ErrorMessages.AddRange(ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
-				_response.IsSuccess = false;
-				_response.StatusCode = HttpStatusCode.BadRequest;
-				return BadRequest(_response);
-			}
+				PageSize = pageSize,
+				PageNumber = pageNumber,
+				TotalItems = totalItems
+			};
 
-			// Validate the sortColumn parameter
-			if (string.IsNullOrEmpty(sortColumn))
+			var products = await _dbProducts.GetAllAsync(
+				pageSize: pagination.PageSize,
+				pageNumber: pagination.PageNumber,
+				sortColumn: sortColumn,
+				sortOrder: sortOrder
+			);
+
+			var viewModel = new ProductIndexViewModel
 			{
-				_response.ErrorMessages.Add("The sortColumn parameter is required.");
-				_response.IsSuccess = false;
-				_response.StatusCode = HttpStatusCode.BadRequest;
-				return BadRequest(_response);
-			}
+				Pagination = pagination,
+				Products = products
+			};
 
-			// Validate that the sortColumn value is valid
-			if (!_validSortColumns.Contains(sortColumn))
-			{
-				_response.ErrorMessages.Add($"The sortColumn value '{sortColumn}' is not valid. Valid values are: {string.Join(", ", _validSortColumns)}.");
-				_response.IsSuccess = false;
-				_response.StatusCode = HttpStatusCode.BadRequest;
-				return BadRequest(_response);
-			}
+			// Add the pagination information to the response headers
+			Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
 
-			// Query the database and map the results to ProductDTO objects
-			try
-			{
-				// Use the sortColumn field to filter and order the results
-				var products = await _dbProducts.GetAllAsync(
-					pageSize: pagination.PageSize,
-					pageNumber: pagination.PageNumber,
-					sortColumn: sortColumn,
-					sortOrder: sortOrder
-				);
-
-				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
-
-				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
-
-				_response.Result = productDTOs;
-				_response.StatusCode = HttpStatusCode.OK;
-
-				return Ok(_response);
-			}
-			catch (Exception ex)
-			{
-				_response.ErrorMessages.Add($"An error occurred while querying the database: {ex.Message}");
-				_response.IsSuccess = false;
-				_response.StatusCode = HttpStatusCode.InternalServerError;
-				return StatusCode((int)HttpStatusCode.InternalServerError, _response);
-			}
+			return View(viewModel);
 		}
 
 

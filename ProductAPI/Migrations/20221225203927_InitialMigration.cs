@@ -4,6 +4,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace ProductAPI.Migrations
 {
     /// <inheritdoc />
@@ -20,9 +22,10 @@ namespace ProductAPI.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Description = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    ParentCategoryId = table.Column<int>(type: "integer", nullable: true)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "NOW()"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "NOW()"),
+                    ParentCategoryId = table.Column<int>(type: "integer", nullable: true),
+                    ProductId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -80,7 +83,9 @@ namespace ProductAPI.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     OwnerId = table.Column<string>(type: "text", nullable: true),
                     ProductId = table.Column<int>(type: "integer", nullable: false),
-                    Url = table.Column<string>(type: "text", nullable: false)
+                    Url = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "NOW()"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "NOW()")
                 },
                 constraints: table =>
                 {
@@ -101,7 +106,9 @@ namespace ProductAPI.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     OwnerId = table.Column<string>(type: "text", nullable: true),
                     ProductId = table.Column<int>(type: "integer", nullable: false),
-                    Url = table.Column<string>(type: "text", nullable: false)
+                    Url = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "NOW()"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "NOW()")
                 },
                 constraints: table =>
                 {
@@ -114,10 +121,71 @@ namespace ProductAPI.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "CategoryId", "CreatedAt", "Description", "Name", "ParentCategoryId", "ProductId" },
+                values: new object[,]
+                {
+                    { 1, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2243), "Smart home devices and systems", "Smart Home", null, null },
+                    { 2, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2258), "Electronic devices and gadgets", "Electronics", null, null },
+                    { 3, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2259), "Arduino microcontroller boards and kits", "Arduino", 1, null },
+                    { 4, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2261), "Electronic accessories and peripherals", "Accessories", 2, null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Products",
+                columns: new[] { "ProductId", "AverageRating", "AvgTimeSpent", "CategoryId", "ClickThroughRate", "ConversionRate", "CreatedAt", "Description", "Manufacturer", "Name", "NumLikes", "NumPurchases", "NumRefunds", "NumReturns", "NumViews", "OnSale", "OwnerId", "Price", "Quantity", "TotalRevenue" },
+                values: new object[,]
+                {
+                    { 2, 4.0, 45, 1, 0.20000000000000001, 0.10000000000000001, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2414), "Its more than just a microcontroller!", "Raspberry Pi Foundation", "Raspberry Pi", 450, 182, 3, 0, 764, false, "username", 19.99m, 10, 899.89999999999998 },
+                    { 3, 4.0, 45, 2, 0.20000000000000001, 0.10000000000000001, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2431), "Its better than the xbox", "Sony Electornics", "PlayStation 5", 450, 182, 3, 0, 764, false, "username", 599.99m, 10, 899.89999999999998 },
+                    { 4, 4.0, 45, 2, 0.20000000000000001, 0.10000000000000001, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2446), "Anthenna for ethical hacking with kali linux", "Atheros", "Atheros 9271L", 450, 182, 3, 0, 764, false, "username", 19.99m, 10, 899.89999999999998 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Images",
+                columns: new[] { "ImageId", "CreatedAt", "OwnerId", "ProductId", "Url" },
+                values: new object[,]
+                {
+                    { 2, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2419), "username", 2, "https://boomslag.s3.us-east-2.amazonaws.com/lightbulb.jpg" },
+                    { 3, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2436), "username", 3, "https://boomslag.s3.us-east-2.amazonaws.com/lightbulb.jpg" },
+                    { 4, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2450), "username", 4, "https://boomslag.s3.us-east-2.amazonaws.com/lightbulb.jpg" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Products",
+                columns: new[] { "ProductId", "AverageRating", "AvgTimeSpent", "CategoryId", "ClickThroughRate", "ConversionRate", "CreatedAt", "Description", "Manufacturer", "Name", "NumLikes", "NumPurchases", "NumRefunds", "NumReturns", "NumViews", "OnSale", "OwnerId", "Price", "Quantity", "TotalRevenue" },
+                values: new object[] { 1, 4.5, 60, 3, 0.20000000000000001, 0.10000000000000001, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2380), "A microcontroller board based on the ATmega328 microcontroller.", "Arduino LLC", "Arduino Uno", 500, 100, 5, 10, 1000, false, "username", 29.99m, 10, 499.89999999999998 });
+
+            migrationBuilder.InsertData(
+                table: "Videos",
+                columns: new[] { "VideoId", "CreatedAt", "OwnerId", "ProductId", "Url" },
+                values: new object[,]
+                {
+                    { 2, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2425), "username", 2, "https://www.youtube.com/watch?v=jDigbTQ7xAM" },
+                    { 3, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2440), "username", 3, "https://www.youtube.com/watch?v=jDigbTQ7xAM" },
+                    { 4, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2455), "username", 4, "https://www.youtube.com/watch?v=jDigbTQ7xAM" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Images",
+                columns: new[] { "ImageId", "CreatedAt", "OwnerId", "ProductId", "Url" },
+                values: new object[] { 1, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2390), "username", 1, "https://boomslag.s3.us-east-2.amazonaws.com/lightbulb.jpg" });
+
+            migrationBuilder.InsertData(
+                table: "Videos",
+                columns: new[] { "VideoId", "CreatedAt", "OwnerId", "ProductId", "Url" },
+                values: new object[] { 1, new DateTime(2022, 12, 25, 15, 39, 27, 363, DateTimeKind.Local).AddTicks(2404), "username", 1, "https://www.youtube.com/watch?v=jDigbTQ7xAM" });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Categories_ParentCategoryId",
                 table: "Categories",
                 column: "ParentCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Categories_ProductId",
+                table: "Categories",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Images_ProductId",
@@ -133,11 +201,22 @@ namespace ProductAPI.Migrations
                 name: "IX_Videos_ProductId",
                 table: "Videos",
                 column: "ProductId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Categories_Products_ProductId",
+                table: "Categories",
+                column: "ProductId",
+                principalTable: "Products",
+                principalColumn: "ProductId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Categories_Products_ProductId",
+                table: "Categories");
+
             migrationBuilder.DropTable(
                 name: "Images");
 
