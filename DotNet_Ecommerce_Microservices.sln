@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FrontEnd", "FrontEnd", "{B803B5E4-61E8-475D-9BB7-86C8170C5063}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{BCF80595-CB25-42D1-BCC4-D28111241B78}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{EC7DB3BC-FB86-49C7-87F4-C9E062CC8C2A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductAPI", "ProductAPI\ProductAPI.csproj", "{98D4BA16-2969-47E4-A624-FD0AE533112A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BCF80595-CB25-42D1-BCC4-D28111241B78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCF80595-CB25-42D1-BCC4-D28111241B78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCF80595-CB25-42D1-BCC4-D28111241B78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCF80595-CB25-42D1-BCC4-D28111241B78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98D4BA16-2969-47E4-A624-FD0AE533112A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98D4BA16-2969-47E4-A624-FD0AE533112A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98D4BA16-2969-47E4-A624-FD0AE533112A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98D4BA16-2969-47E4-A624-FD0AE533112A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BCF80595-CB25-42D1-BCC4-D28111241B78} = {B803B5E4-61E8-475D-9BB7-86C8170C5063}
+		{98D4BA16-2969-47E4-A624-FD0AE533112A} = {EC7DB3BC-FB86-49C7-87F4-C9E062CC8C2A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {79958D38-4FEA-4D80-B8BD-B299BF946D29}
+	EndGlobalSection
+EndGlobal
