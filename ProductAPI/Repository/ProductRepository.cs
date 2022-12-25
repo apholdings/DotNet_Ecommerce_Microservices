@@ -20,24 +20,17 @@ namespace ProductAPI.Repository
 		}
 
 
-		private readonly IList<string> _validSortColumns = new List<string> { "Owner", "Name", "Price", "Category", "OnSale", "AverageRating" };
 		public async Task<IEnumerable<Product>> GetAllAsync(int pageSize, int pageNumber, string sortColumn, bool sortOrder)
 		{
+			// Validate the pagination parameters
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize), "The pageSize parameter must be greater than zero.");
+			}
+
 			if (pageNumber <= 0)
 			{
 				throw new ArgumentOutOfRangeException(nameof(pageNumber), "The pageNumber parameter must be greater than zero.");
-			}
-
-			// Validate the sortColumn parameter
-			if (string.IsNullOrEmpty(sortColumn))
-			{
-				throw new ArgumentException("The sortColumn parameter is required.");
-			}
-
-			// Validate that the sortColumn value is valid
-			if (!_validSortColumns.Contains(sortColumn))
-			{
-				throw new ArgumentException($"The sortColumn value '{sortColumn}' is not valid. Valid values are: {string.Join(", ", _validSortColumns)}.");
 			}
 
 			// Build the query
@@ -47,15 +40,31 @@ namespace ProductAPI.Repository
 				.Include(p => p.Videos)  // Include the Videos navigation property
 				.AsQueryable();
 
-			// Validate that the sortColumn value is a valid property of the Product class
-			var prop = typeof(Product).GetProperty(sortColumn);
-			if (prop == null)
-			{
-				throw new ArgumentException($"The sortColumn value '{sortColumn}' is not a valid property of the Product class.");
-			}
-
 			// Implement sorting logic here using the sortColumn and sortOrder parameters
-			query = sortOrder ? query.OrderBy(p => prop.GetValue(p)) : query.OrderByDescending(p => prop.GetValue(p));
+			if (sortColumn == "owner")
+			{
+				query = sortOrder ? query.OrderBy(p => p.OwnerId) : query.OrderByDescending(p => p.OwnerId);
+			}
+			else if (sortColumn == "name")
+			{
+				query = sortOrder ? query.OrderBy(p => p.Name) : query.OrderByDescending(p => p.Name);
+			}
+			else if (sortColumn == "priceRange")
+			{
+				query = sortOrder ? query.OrderBy(p => p.Price) : query.OrderByDescending(p => p.Price);
+			}
+			else if (sortColumn == "category")
+			{
+				query = sortOrder ? query.OrderBy(p => p.CategoryId) : query.OrderByDescending(p => p.CategoryId);
+			}
+			else if (sortColumn == "onSale")
+			{
+				query = sortOrder ? query.OrderBy(p => p.OnSale) : query.OrderByDescending(p => p.OnSale);
+			}
+			else if (sortColumn == "averageRating")
+			{
+				query = sortOrder ? query.OrderBy(p => p.AverageRating) : query.OrderByDescending(p => p.AverageRating);
+			}
 
 			// Implement pagination logic here using the pageSize and pageNumber parameters
 			if (pageSize > 0 && pageNumber > 0)
