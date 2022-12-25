@@ -7,11 +7,12 @@ using ProductAPI.Models.DTO.VideoDtos;
 
 namespace ProductAPI
 {
-    public class MappingConfig : Profile
+	public class MappingConfig : Profile
 	{
 		public MappingConfig()
 		{
-			CreateMap<Product, ProductDTO>().ReverseMap();
+			CreateMap<Product, ProductDTO>()
+				.ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category));
 			CreateMap<Product, ProductCreateDTO>().ReverseMap();
 			CreateMap<Product, ProductUpdateDTO>().ReverseMap();
 

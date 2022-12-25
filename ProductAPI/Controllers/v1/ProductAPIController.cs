@@ -31,7 +31,10 @@ namespace ProductAPI.Controllers.v1
 		private readonly IList<string> _validSortColumns = new List<string> { "owner", "name", "priceRange", "category", "onSale", "averageRating" };
 
 		[HttpGet]
-		public async Task<IActionResult> GetAll([FromQuery] Pagination pagination, [Required] string sortColumn, bool sortOrder = false)
+		[ResponseCache(CacheProfileName = "Default60")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		public async Task<ActionResult<APIResponse>> GetAll([FromQuery] Pagination pagination, [Required] string sortColumn, bool sortOrder = false)
 		{
 			// Validate the pagination object
 			if (!ModelState.IsValid)
@@ -51,7 +54,6 @@ namespace ProductAPI.Controllers.v1
 				return BadRequest(_response);
 			}
 
-
 			// Validate that the sortColumn value is valid
 			if (!_validSortColumns.Contains(sortColumn))
 			{
@@ -61,12 +63,21 @@ namespace ProductAPI.Controllers.v1
 				return BadRequest(_response);
 			}
 
-
 			// Query the database and map the results to ProductDTO objects
 			try
 			{
-				var products = await _dbProducts.GetAllAsync(pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder);
+				// Use the sortColumn field to filter and order the results
+				var products = await _dbProducts.GetAllAsync(
+					pageSize: pagination.PageSize,
+					pageNumber: pagination.PageNumber,
+					sortColumn: sortColumn,
+					sortOrder: sortOrder
+				);
+
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
+
+				// Add the pagination information to the response headers
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;

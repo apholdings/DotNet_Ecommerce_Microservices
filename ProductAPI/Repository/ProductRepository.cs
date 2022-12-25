@@ -16,7 +16,12 @@ namespace ProductAPI.Repository
 
 		public async Task<IEnumerable<Product>> GetAllAsync(int pageSize = 0, int pageNumber = 1, string sortColumn = "", bool sortOrder = false)
 		{
-			IQueryable<Product> query = _db.Products;
+
+			IQueryable<Product> query = _db.Products
+				.Include(p => p.Category)  // Include the Category navigation property
+				.Include(p => p.Images)  // Include the Images navigation property
+				.Include(p => p.Videos)  // Include the Videos navigation property
+				.AsQueryable();
 
 			// Implement sorting logic here using the sortColumn and sortOrder parameters
 			if (sortColumn == "owner")
