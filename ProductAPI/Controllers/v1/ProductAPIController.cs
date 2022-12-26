@@ -7,6 +7,7 @@ using ProductAPI.Repository;
 using ProductAPI.Repository.IRepository;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net;
 using System.Text.Json;
 
@@ -72,15 +73,18 @@ namespace ProductAPI.Controllers.v1
 				return BadRequest(_response);
 			}
 
-
 			// Query the database and map the results to ProductDTO objects
 			try
 			{
 				var products = await _dbProducts.GetAllAsync(pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
+				// Calculate the total number of pages and total number of items
+				int totalItems = products.Count();
+				int totalPages = (int)Math.Ceiling((double)totalItems / pagination.PageSize);
+
 				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(new { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize, TotalItems = totalItems, TotalPages = totalPages }));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;
@@ -96,8 +100,6 @@ namespace ProductAPI.Controllers.v1
 			}
 		}
 
-
-		
 
 
 		[HttpGet("search")]
@@ -149,18 +151,18 @@ namespace ProductAPI.Controllers.v1
 		}
 
 
-		[HttpGet("{productName}", Name = "GetProduct")]
+		[HttpGet("{productId}", Name = "GetProduct")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<APIResponse>> GetProduct(string productName)
+		public async Task<ActionResult<APIResponse>> GetProduct(int id)
 		{
 			// Get the product from the repository
-			var product = await _dbProducts.GetProductByNameAsync(productName, 24, false);
+			var product = await _dbProducts.GetProductByIdAsync(id, false);
 
 			// Check if the product was found
 			if (product == null)
 			{
-				_response.ErrorMessages.Add($"Product with name '{productName}' was not found.");
+				_response.ErrorMessages.Add($"Product with id '{id}' was not found.");
 				_response.IsSuccess = false;
 				_response.StatusCode = HttpStatusCode.NotFound;
 				return NotFound(_response);
@@ -168,7 +170,6 @@ namespace ProductAPI.Controllers.v1
 
 			try
 			{
-
 				// Map the product to a product DTO
 				var productDto = _mapper.Map<ProductDTO>(product);
 
@@ -209,6 +210,17 @@ namespace ProductAPI.Controllers.v1
 				//	return BadRequest("Invalid category");
 				//}
 
+				//	// Check if the user is authorized to create a product
+				//	// You'll need to implement this check yourself
+				//	if (!await IsAuthorizedToCreateProduct())
+				//	{
+				//		return Unauthorized();
+				//	}
+
+				//	// Set the owner id of the product to the current user's id
+				//	// You'll need to implement this yourself
+				//	model.OwnerId = GetCurrentUserId();
+
 				Product product = _mapper.Map<Product>(createDTO);
 
 				await _dbProducts.CreateProductAsync(product);
@@ -216,7 +228,7 @@ namespace ProductAPI.Controllers.v1
 				_response.Result = _mapper.Map<ProductDTO>(product);
 				_response.StatusCode = HttpStatusCode.Created;
 				_response.IsSuccess = true;
-				return CreatedAtRoute("GetProduct", new { productName = product.Name }, _response);
+				return CreatedAtRoute("GetProduct", new { id = product.ProductId }, _response);
 			}
 			catch (Exception ex)
 			{
@@ -226,31 +238,6 @@ namespace ProductAPI.Controllers.v1
 			}
 			return _response;
 		}
-		//[HttpPost]
-		//public async Task<IActionResult> CreateProduct([FromBody] Product model)
-		//{
-		//	// Validate the input model
-		//	if (!ModelState.IsValid)
-		//	{
-		//		return BadRequest(ModelState);
-		//	}
-
-		//	// Check if the user is authorized to create a product
-		//	// You'll need to implement this check yourself
-		//	if (!await IsAuthorizedToCreateProduct())
-		//	{
-		//		return Unauthorized();
-		//	}
-
-		//	// Set the owner id of the product to the current user's id
-		//	// You'll need to implement this yourself
-		//	model.OwnerId = GetCurrentUserId();
-
-		//	// Create the product
-		//	await _dbProducts.CreateAsync(model);
-
-		//	return Ok();
-		//}
 
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteProduct(int id)
@@ -309,7 +296,7 @@ namespace ProductAPI.Controllers.v1
 
 				response.StatusCode = HttpStatusCode.NoContent;
 				response.IsSuccess = true;
-				return response;
+				return CreatedAtRoute("UpdateProduct", null, _response);
 			}
 			catch (Exception ex)
 			{
@@ -360,8 +347,13 @@ namespace ProductAPI.Controllers.v1
 				var products = await _dbProducts.GetProductsForCategoryAsync(categoryId, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
+
+				// Calculate the total number of pages and total number of items
+				int totalItems = products.Count();
+				int totalPages = (int)Math.Ceiling((double)totalItems / pagination.PageSize);
+
 				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(new { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize, TotalItems = totalItems, TotalPages = totalPages }));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;
@@ -417,8 +409,12 @@ namespace ProductAPI.Controllers.v1
 				var products = await _dbProducts.GetProductsByAverageRatingAsync(averageRating, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder,tracked);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
+				// Calculate the total number of pages and total number of items
+				int totalItems = products.Count();
+				int totalPages = (int)Math.Ceiling((double)totalItems / pagination.PageSize);
+
 				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(new { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize, TotalItems = totalItems, TotalPages = totalPages }));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;
@@ -465,8 +461,12 @@ namespace ProductAPI.Controllers.v1
 				var products = await _dbProducts.GetProductsByAvgTimeSpentAsync(averageTimeSpent, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn, sortOrder, tracked);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
+				// Calculate the total number of pages and total number of items
+				int totalItems = products.Count();
+				int totalPages = (int)Math.Ceiling((double)totalItems / pagination.PageSize);
+
 				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(new { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize, TotalItems = totalItems, TotalPages = totalPages }));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;
@@ -513,8 +513,12 @@ namespace ProductAPI.Controllers.v1
 				var products = await _dbProducts.GetProductsByClickThroughRateAsync(clickThroughRate, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder, tracked);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
+				// Calculate the total number of pages and total number of items
+				int totalItems = products.Count();
+				int totalPages = (int)Math.Ceiling((double)totalItems / pagination.PageSize);
+
 				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(new { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize, TotalItems = totalItems, TotalPages = totalPages }));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;
@@ -561,8 +565,12 @@ namespace ProductAPI.Controllers.v1
 				var products = await _dbProducts.GetProductsByConversionRateAsync(conversionRate, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder, tracked);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
+				// Calculate the total number of pages and total number of items
+				int totalItems = products.Count();
+				int totalPages = (int)Math.Ceiling((double)totalItems / pagination.PageSize);
+
 				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(new { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize, TotalItems = totalItems, TotalPages = totalPages }));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;
@@ -609,8 +617,12 @@ namespace ProductAPI.Controllers.v1
 				var products = await _dbProducts.GetProductsByManufacturerAsync(manufacturer, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder, tracked);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
+				// Calculate the total number of pages and total number of items
+				int totalItems = products.Count();
+				int totalPages = (int)Math.Ceiling((double)totalItems / pagination.PageSize);
+
 				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(new { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize, TotalItems = totalItems, TotalPages = totalPages }));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;
@@ -658,8 +670,12 @@ namespace ProductAPI.Controllers.v1
 				var products = await _dbProducts.GetProductsByNumLikesAsync(numLikes, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder, tracked);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
+				// Calculate the total number of pages and total number of items
+				int totalItems = products.Count();
+				int totalPages = (int)Math.Ceiling((double)totalItems / pagination.PageSize);
+
 				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(new { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize, TotalItems = totalItems, TotalPages = totalPages }));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;
@@ -706,8 +722,12 @@ namespace ProductAPI.Controllers.v1
 				var products = await _dbProducts.GetProductsByNumPurchasesAsync(numPurchases, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder, tracked);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
+				// Calculate the total number of pages and total number of items
+				int totalItems = products.Count();
+				int totalPages = (int)Math.Ceiling((double)totalItems / pagination.PageSize);
+
 				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(new { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize, TotalItems = totalItems, TotalPages = totalPages }));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;
@@ -755,8 +775,12 @@ namespace ProductAPI.Controllers.v1
 				var products = await _dbProducts.GetProductsByNumViewsAsync(numViews, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder, tracked);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
+				// Calculate the total number of pages and total number of items
+				int totalItems = products.Count();
+				int totalPages = (int)Math.Ceiling((double)totalItems / pagination.PageSize);
+
 				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(new { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize, TotalItems = totalItems, TotalPages = totalPages }));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;
@@ -804,8 +828,12 @@ namespace ProductAPI.Controllers.v1
 				var products = await _dbProducts.GetProductsByOnSaleAsync(onSale, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder, tracked);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
+				// Calculate the total number of pages and total number of items
+				int totalItems = products.Count();
+				int totalPages = (int)Math.Ceiling((double)totalItems / pagination.PageSize);
+
 				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(new { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize, TotalItems = totalItems, TotalPages = totalPages }));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;
@@ -853,8 +881,12 @@ namespace ProductAPI.Controllers.v1
 				var products = await _dbProducts.GetProductsByTotalRevenueAsync(totalRevenue, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder, tracked);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
+				// Calculate the total number of pages and total number of items
+				int totalItems = products.Count();
+				int totalPages = (int)Math.Ceiling((double)totalItems / pagination.PageSize);
+
 				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(new { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize, TotalItems = totalItems, TotalPages = totalPages }));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;
@@ -871,7 +903,7 @@ namespace ProductAPI.Controllers.v1
 		}
 
 
-		[HttpGet("byowner/{ownerId}")]
+		[HttpGet("listByOwner/{ownerId}")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -902,8 +934,12 @@ namespace ProductAPI.Controllers.v1
 				var products = await _dbProducts.GetProductsByOwnerAsync(ownerId, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
+				// Calculate the total number of pages and total number of items
+				int totalItems = products.Count();
+				int totalPages = (int)Math.Ceiling((double)totalItems / pagination.PageSize);
+
 				// Add the pagination information to the response headers
-				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+				Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(new { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize, TotalItems = totalItems, TotalPages = totalPages }));
 
 				_response.Result = productDTOs;
 				_response.StatusCode = HttpStatusCode.OK;

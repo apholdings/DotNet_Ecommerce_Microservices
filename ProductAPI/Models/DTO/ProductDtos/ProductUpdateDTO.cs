@@ -11,7 +11,7 @@ namespace ProductAPI.Models.DTO.ProductDtos
 		public decimal Price { get; set; }
 		public int CategoryId { get; set; }
 		public int Quantity { get; set; }
-		public ICollection<VideoDTO> Videos { get; set; }
-		public ICollection<ImageDTO> Images { get; set; }
+		public string Manufacturer { get; set; }
+		public bool OnSale { get; set; }
 	}
 }
