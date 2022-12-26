@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Pipelines.Sockets.Unofficial.Buffers;
 using ProductAPI.Data;
 using ProductAPI.Models;
 using ProductAPI.Repository.IRepository;
+using System;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ProductAPI.Repository
@@ -141,10 +143,10 @@ namespace ProductAPI.Repository
 			}
 		}
 
-		public async Task<Product> GetProductByNameAsync(string productName, int cacheDuration, bool tracked = true)
+		public async Task<Product> GetProductBySlugAsync(string slug, int cacheDuration, bool tracked = true)
 		{
 			// Build the cache key
-			string cacheKey = $"product_{productName}";
+			string cacheKey = $"product_{slug}";
 
 			// Check if the product is already cached
 			if (_cache.TryGetValue(cacheKey, out Product product))
@@ -158,7 +160,7 @@ namespace ProductAPI.Repository
 				.Include(p => p.Category)  // Include the Category navigation property
 				.Include(p => p.Images)  // Include the Images navigation property
 				.Include(p => p.Videos)  // Include the Videos navigation property
-				.Where(p => EF.Functions.ToTsVector("english", p.Name).Matches(EF.Functions.ToTsQuery("english", productName)))
+				.Where(p => EF.Functions.ToTsVector("english", p.Name).Matches(EF.Functions.ToTsQuery("english", slug)))
 				.FirstOrDefaultAsync();
 
 			if (!tracked)
@@ -1065,62 +1067,58 @@ namespace ProductAPI.Repository
 
 		public async Task CreateProductAsync(Product product)
 		{
-			try
+			// Set the video and image IDs
+			int maxVideoId = _db.Videos.Max(v => v.VideoId);
+			int maxImageId = _db.Images.Max(i => i.ImageId);
+
+			if (product.Videos == null)
 			{
-				// Set the video and image IDs
-				int maxVideoId = _db.Videos.Max(v => v.VideoId);
-				int maxImageId = _db.Images.Max(i => i.ImageId);
-
-				if (product.Videos == null)
-				{
-					product.Videos = new List<Video>();
-				}
-				if (product.Images == null)
-				{
-					product.Images = new List<Image>();
-				}
-				if (product.Videos != null)
-				{
-					foreach (var video in product.Videos)
-					{
-						video.VideoId = maxVideoId == 0 ? 1 : ++maxVideoId; // Set the VideoId to 1 if the database is empty, otherwise increment the maxVideoId by 1
-						video.ProductId = product.ProductId;
-						video.OwnerId = product.OwnerId; // Add the ownerId to the video
-					}
-				}
-				if (product.Images != null)
-				{
-					foreach (var image in product.Images)
-					{
-						image.ImageId = maxImageId == 0 ? 1 : ++maxImageId; // Set the ImageId to 1 if the database is empty, otherwise increment the maxImageId by 1
-						image.ProductId = product.ProductId;
-						image.OwnerId = product.OwnerId; // Add the ownerId to the image
-					}
-				}
-
-				// Get the highest ProductId from the database
-				int maxProductId = _db.Products.Max(p => p.ProductId);
-
-				// Set the ProductId of the product based on the highest ProductId
-				product.ProductId = maxProductId + 1;
-
-				// Add the product, videos, and images to the database and save changes
-				await _db.Products.AddAsync(product);
-				if (product.Videos != null)
-				{
-					await _db.Videos.AddRangeAsync(product.Videos);
-				}
-				if (product.Images != null)
-				{
-					await _db.Images.AddRangeAsync(product.Images);
-				}
-				await _db.SaveChangesAsync();
+				product.Videos = new List<Video>();
 			}
-			catch (Exception ex)
+			if (product.Images == null)
 			{
-				// Handle the exception
-				Console.WriteLine(ex.Message);
+				product.Images = new List<Image>();
 			}
+			if (product.Videos != null)
+			{
+				foreach (var video in product.Videos)
+				{
+					video.VideoId = maxVideoId == 0 ? 1 : ++maxVideoId; // Set the VideoId to 1 if the database is empty, otherwise increment the maxVideoId by 1
+					video.ProductId = product.ProductId;
+					video.OwnerId = product.OwnerId; // Add the ownerId to the video
+				}
+			}
+			if (product.Images != null)
+			{
+				foreach (var image in product.Images)
+				{
+					image.ImageId = maxImageId == 0 ? 1 : ++maxImageId; // Set the ImageId to 1 if the database is empty, otherwise increment the maxImageId by 1
+					image.ProductId = product.ProductId;
+					image.OwnerId = product.OwnerId; // Add the ownerId to the image
+				}
+			}
+
+			// Generate the slug for the product
+			product.GenerateSlug();
+
+			// Get the highest ProductId from the database
+			int maxProductId = _db.Products.Max(p => p.ProductId);
+
+			// Set the ProductId of the product based on the highest ProductId
+			product.ProductId = maxProductId + 1;
+
+			// Add the product, videos, and images to the database and save changes
+			await _db.Products.AddAsync(product);
+			if (product.Videos != null)
+			{
+				await _db.Videos.AddRangeAsync(product.Videos);
+			}
+			if (product.Images != null)
+			{
+				await _db.Images.AddRangeAsync(product.Images);
+			}
+			await _db.SaveChangesAsync();
+			
 		}
 
 		public async Task<Product> GetProductByIdAsync(int id, bool tracked = true)
@@ -1184,7 +1182,53 @@ namespace ProductAPI.Repository
 			}
 		}
 
-		
+		public async Task<Product> UpdateAsync(Product entity, string ownerId)
+		{
+			// If the product is not found, return null
+			if (entity == null)
+			{
+				return null;
+			}
 
+			// If the product owner does not match the user, return null
+			if (entity.OwnerId != ownerId)
+			{
+				return null;
+			}
+
+			// Retrieve the original Product entity from the database
+			Product originalEntity = await _db.Products.FindAsync(entity.ProductId);
+
+			// Update the values of the original Entity
+			originalEntity.Name = entity.Name;
+			originalEntity.Description = entity.Description;
+			originalEntity.Price = entity.Price;
+			originalEntity.UpdatedAt = DateTime.UtcNow;
+
+			// Save the changes to the database
+			_db.Products.Update(originalEntity);
+			await _db.SaveChangesAsync();
+			return originalEntity;
+		}
+
+		public async Task<Product> PatchAsync(Product entity, string ownerId)
+		{
+			// If the product is not found, return null
+			if (entity == null)
+			{
+				return null;
+			}
+
+			// If the product owner does not match the user, return null
+			if (entity.OwnerId != ownerId)
+			{
+				return null;
+			}
+
+			entity.UpdatedAt = DateTime.UtcNow;
+			_db.Products.Update(entity);
+			await _db.SaveChangesAsync();
+			return entity;
+		}
 	}
 }

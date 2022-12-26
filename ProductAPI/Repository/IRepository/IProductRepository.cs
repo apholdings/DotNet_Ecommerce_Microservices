@@ -8,8 +8,11 @@ namespace ProductAPI.Repository.IRepository
 		Task<IEnumerable<Product>> GetProductsForCategoryAsync(int categoryId, int pageSize = 0, int pageNumber = 1, string sortColumn = "", bool sortOrder = false, bool tracked = true);
 		Task<int> CountAsync();
 		Task CreateProductAsync(Product product);
+		Task<Product> UpdateAsync(Product entity, string ownerId);
+		Task<Product> PatchAsync(Product entity, string ownerId);
+
 		Task<IEnumerable<Product>> GetAllAsync(int pageSize = 0, int pageNumber = 1, string sortColumn = "", bool sortOrder = false);
-		Task<Product> GetProductByNameAsync(string productName, int cacheDuration, bool tracked = true);
+		Task<Product> GetProductBySlugAsync(string slug, int cacheDuration, bool tracked = true);
 		Task<Product> GetProductByIdAsync(int id, bool tracked = true);
 		Task<IEnumerable<Product>> SearchProductsAsync(string searchQuery, Pagination pagination, bool tracked = true);  // Add the pagination parameter here
 

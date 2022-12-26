@@ -112,24 +112,24 @@ namespace ProductAPI.Data
 					CategoryId = 1,
 					Name = "Smart Home",
 					Description = "Smart home devices and systems",
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				},
 				new Category
 				{
 					CategoryId = 2,
 					Name = "Electronics",
 					Description = "Electronic devices and gadgets",
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				},
 				new Category
 				{
 					CategoryId = 3,
 					Name = "Arduino",
 					Description = "Arduino microcontroller boards and kits",
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now,
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow,
 					ParentCategoryId = 1
 				},
 				new Category
@@ -137,8 +137,8 @@ namespace ProductAPI.Data
 					CategoryId = 4,
 					Name = "Accessories",
 					Description = "Electronic accessories and peripherals",
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now,
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow,
 					ParentCategoryId = 2
 				}
 			);
@@ -154,6 +154,7 @@ namespace ProductAPI.Data
 					Name = "Arduino Uno",
 					Description = "A microcontroller board based on the ATmega328 microcontroller.",
 					Price = 29.99m,
+					Slug = "arduino-uno",
 					CategoryId = 3,
 					Quantity = 10,
 					AverageRating = 4.5,
@@ -168,8 +169,8 @@ namespace ProductAPI.Data
 					NumRefunds = 5,
 					Manufacturer = "Arduino LLC",
 					OnSale = false,
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				}
 			);
 			modelBuilder.Entity<Image>().HasData(
@@ -179,8 +180,8 @@ namespace ProductAPI.Data
 					OwnerId = "username",
 					ProductId = 1,
 					Url = "https://boomslag.s3.us-east-2.amazonaws.com/lightbulb.jpg",
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				}
 			);
 			modelBuilder.Entity<Video>().HasData(
@@ -190,8 +191,8 @@ namespace ProductAPI.Data
 					OwnerId = "username",
 					ProductId = 1,
 					Url = "https://www.youtube.com/watch?v=jDigbTQ7xAM",
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				}
 			);
 
@@ -203,6 +204,7 @@ namespace ProductAPI.Data
 					ProductId = 2,
 					OwnerId = "username",
 					Name = "Raspberry Pi",
+					Slug = "raspberry-pi",
 					Description = "Its more than just a microcontroller!",
 					Price = 19.99m,
 					CategoryId = 1,
@@ -219,8 +221,8 @@ namespace ProductAPI.Data
 					NumRefunds = 3,
 					Manufacturer = "Raspberry Pi Foundation",
 					OnSale = false,
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				}
 			);
 			modelBuilder.Entity<Image>().HasData(
@@ -230,8 +232,8 @@ namespace ProductAPI.Data
 					OwnerId = "username",
 					ProductId = 2,
 					Url = "https://boomslag.s3.us-east-2.amazonaws.com/lightbulb.jpg",
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				}
 			);
 			modelBuilder.Entity<Video>().HasData(
@@ -241,8 +243,8 @@ namespace ProductAPI.Data
 					OwnerId = "username",
 					ProductId = 2,
 					Url = "https://www.youtube.com/watch?v=jDigbTQ7xAM",
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				}
 			);
 
@@ -254,6 +256,7 @@ namespace ProductAPI.Data
 					ProductId = 3,
 					OwnerId = "username",
 					Name = "PlayStation 5",
+					Slug = "playstation-5",
 					Description = "Its better than the xbox",
 					Price = 599.99m,
 					CategoryId = 2,
@@ -270,8 +273,8 @@ namespace ProductAPI.Data
 					NumRefunds = 3,
 					Manufacturer = "Sony Electornics",
 					OnSale = false,
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				}
 			);
 			modelBuilder.Entity<Image>().HasData(
@@ -281,8 +284,8 @@ namespace ProductAPI.Data
 					OwnerId = "username",
 					ProductId = 3,
 					Url = "https://boomslag.s3.us-east-2.amazonaws.com/lightbulb.jpg",
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				}
 			);
 			modelBuilder.Entity<Video>().HasData(
@@ -292,8 +295,8 @@ namespace ProductAPI.Data
 					OwnerId = "username",
 					ProductId = 3,
 					Url = "https://www.youtube.com/watch?v=jDigbTQ7xAM",
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				}
 			);
 
@@ -305,6 +308,7 @@ namespace ProductAPI.Data
 					ProductId = 4,
 					OwnerId = "username",
 					Name = "Atheros 9271L",
+					Slug = "atheros-9271l",
 					Description = "Anthenna for ethical hacking with kali linux",
 					Price = 19.99m,
 					CategoryId = 2,
@@ -321,8 +325,8 @@ namespace ProductAPI.Data
 					NumRefunds = 3,
 					Manufacturer = "Atheros",
 					OnSale = false,
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				}
 			);
 			modelBuilder.Entity<Image>().HasData(
@@ -332,8 +336,8 @@ namespace ProductAPI.Data
 					OwnerId = "username",
 					ProductId = 4,
 					Url = "https://boomslag.s3.us-east-2.amazonaws.com/lightbulb.jpg",
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				}
 			);
 			modelBuilder.Entity<Video>().HasData(
@@ -343,8 +347,8 @@ namespace ProductAPI.Data
 					OwnerId = "username",
 					ProductId = 4,
 					Url = "https://www.youtube.com/watch?v=jDigbTQ7xAM",
-					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
 				}
 			);
 

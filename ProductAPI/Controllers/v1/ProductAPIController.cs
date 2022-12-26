@@ -155,15 +155,15 @@ namespace ProductAPI.Controllers.v1
 		[HttpGet("{productId}", Name = "GetProduct")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<APIResponse>> GetProduct(int id)
+		public async Task<ActionResult<APIResponse>> GetProduct(string slug)
 		{
 			// Get the product from the repository
-			var product = await _dbProducts.GetProductByIdAsync(id, false);
+			var product = await _dbProducts.GetProductBySlugAsync(slug, 5,false);
 
 			// Check if the product was found
 			if (product == null)
 			{
-				_response.ErrorMessages.Add($"Product with id '{id}' was not found.");
+				_response.ErrorMessages.Add($"Product with id '{slug}' was not found.");
 				_response.IsSuccess = false;
 				_response.StatusCode = HttpStatusCode.NotFound;
 				return NotFound(_response);
@@ -229,7 +229,7 @@ namespace ProductAPI.Controllers.v1
 				_response.Result = _mapper.Map<ProductDTO>(product);
 				_response.StatusCode = HttpStatusCode.Created;
 				_response.IsSuccess = true;
-				return CreatedAtRoute("GetProduct", new { id = product.ProductId }, _response);
+				return CreatedAtRoute("GetProduct", new { slug = product.Slug }, _response);
 			}
 			catch (Exception ex)
 			{
@@ -263,6 +263,95 @@ namespace ProductAPI.Controllers.v1
 			return NoContent();
 		}
 
+
+		// UPDATE
+		[HttpPut("{id:int}", Name = "UpdateProduct")]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		public async Task<ActionResult<APIResponse>> UpdateProduct(int id, [FromBody] ProductUpdateDTO updateDTO, [FromHeader] string ownerId)
+		{
+			// Initialize the response object
+			_response = new APIResponse();
+			_response.ErrorMessages = new List<string>();
+
+			try
+			{
+
+				// Validate the request body and the id parameter
+				if (updateDTO == null || id != updateDTO.ProductId)
+				{
+					_response.ErrorMessages.Add("The request body and id parameter do not match.");
+					_response.IsSuccess = false;
+					_response.StatusCode = HttpStatusCode.BadRequest;
+					return BadRequest(_response);
+				}
+
+				// Map the updateDTO to a Product object
+				Product model = _mapper.Map<Product>(updateDTO);
+				model.OwnerId = ownerId; // Set the ownerId on the model
+
+				// Update the product in the repository
+				var result = await _dbProducts.UpdateAsync(model, ownerId); // Pass the ownerId to the UpdateAsync method
+
+				// If the update was not successful, return a bad request response
+				if (result == null)
+				{
+					_response.ErrorMessages.Add("Error updating product.");
+					_response.IsSuccess = false;
+					_response.StatusCode = HttpStatusCode.BadRequest;
+					return BadRequest(_response);
+				}
+
+				// Return a no content response if the update was successful
+				_response.StatusCode = HttpStatusCode.NoContent;
+				_response.IsSuccess = true;
+				return NoContent();
+			}
+			catch (Exception ex)
+			{
+				// Log the exception and return a bad request response
+				_logger.LogError(ex, "Error updating product: {0}", id);
+				_response.ErrorMessages.Add(ex.ToString());
+				_response.IsSuccess = false;
+				_response.StatusCode = HttpStatusCode.BadRequest;
+				return BadRequest(_response);
+			}
+
+
+		}
+
+		// PATCH
+		[HttpPatch("{id:int}", Name = "UpdatePartialProduct")]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		public async Task<IActionResult> UpdatePartialProduct(int id, JsonPatchDocument<ProductUpdateDTO> patchDTO, [FromHeader] string ownerId)
+		{
+			if (patchDTO == null || id == 0)
+			{
+				return BadRequest();
+			}
+
+			var product = await _dbProducts.GetAsync(u => u.ProductId == id, tracked: false);
+
+			ProductUpdateDTO productDTO = _mapper.Map<ProductUpdateDTO>(product);
+
+			if (product == null)
+			{
+				return BadRequest();
+			}
+			patchDTO.ApplyTo(productDTO, ModelState);
+
+			Product model = _mapper.Map<Product>(productDTO);
+
+
+			await _dbProducts.PatchAsync(model, ownerId);
+
+			if (!ModelState.IsValid)
+			{
+				return BadRequest(ModelState);
+			}
+			return NoContent();
+		}
 
 
 		[HttpGet("category/{categoryId}")]
@@ -911,8 +1000,6 @@ namespace ProductAPI.Controllers.v1
 				return StatusCode(500, _response);
 			}
 		}
-
-
 
 
 	}

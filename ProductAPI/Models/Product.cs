@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.RegularExpressions;
 
 namespace ProductAPI.Models
 {
@@ -12,18 +13,32 @@ namespace ProductAPI.Models
 		[Required]
 		[StringLength(255)]
 		public string Name { get; set; }
+		[RegularExpression(@"^[a-z0-9-]+$", ErrorMessage = "Slug must only contain lowercase alphanumeric characters and hyphens.")]
+		[StringLength(255, ErrorMessage = "Slug must be at most 255 characters long.")]
+		[Required(ErrorMessage = "Slug is required.")]
+		public string Slug { get; set; }
+		public void GenerateSlug()
+		{
+			// Replace spaces with hyphens and convert to lowercase
+			Slug = Name.Replace(" ", "-").ToLowerInvariant();
+
+			// Remove any invalid characters
+			Slug = Regex.Replace(Slug, @"[^a-z0-9-]", "");
+		}
 
 		[StringLength(2000)]
 		public string Description { get; set; }
-
+		[Required]
 		[Range(0, double.MaxValue)]
 		public decimal Price { get; set; }
-
+		[Range(0, double.MaxValue)]
+		public decimal DiscountPrice { get; set; }
+		[Required]
 		[ForeignKey("Category")]
 		public int CategoryId { get; set; }
 		public Category Category { get; set; }
 		public ICollection<Category> Categories { get; set; }
-
+		[Required]
 		[Range(0, int.MaxValue)]
 		public int Quantity { get; set; }
 

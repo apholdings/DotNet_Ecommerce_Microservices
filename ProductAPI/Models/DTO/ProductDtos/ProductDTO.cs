@@ -9,8 +9,10 @@ namespace ProductAPI.Models.DTO.ProductDtos
 		public int ProductId { get; set; }
 		public string OwnerId { get; set; }
 		public string Name { get; set; }
+		public string Slug { get; set; }
 		public string Description { get; set; }
 		public decimal Price { get; set; }
+		public decimal DiscountPrice { get; set; }
 		public CategoryDTO Category { get; set; }  // Add this property
 		public int Quantity { get; set; }
 		// Add properties for the list of Images and Videos

@@ -67,36 +67,36 @@ namespace ProductAPI.Migrations
                         new
                         {
                             CategoryId = 1,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(8931),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(6915),
                             Description = "Smart home devices and systems",
                             Name = "Smart Home",
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(8944)
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(6916)
                         },
                         new
                         {
                             CategoryId = 2,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(8945),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(6917),
                             Description = "Electronic devices and gadgets",
                             Name = "Electronics",
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(8946)
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(6918)
                         },
                         new
                         {
                             CategoryId = 3,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(8947),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(6919),
                             Description = "Arduino microcontroller boards and kits",
                             Name = "Arduino",
                             ParentCategoryId = 1,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(8947)
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(6919)
                         },
                         new
                         {
                             CategoryId = 4,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(8948),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(6938),
                             Description = "Electronic accessories and peripherals",
                             Name = "Accessories",
                             ParentCategoryId = 2,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(8949)
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(6939)
                         });
                 });
 
@@ -138,37 +138,37 @@ namespace ProductAPI.Migrations
                         new
                         {
                             ImageId = 1,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9069),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7055),
                             OwnerId = "username",
                             ProductId = 1,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9069),
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7055),
                             Url = "https://boomslag.s3.us-east-2.amazonaws.com/lightbulb.jpg"
                         },
                         new
                         {
                             ImageId = 2,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9092),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7078),
                             OwnerId = "username",
                             ProductId = 2,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9093),
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7079),
                             Url = "https://boomslag.s3.us-east-2.amazonaws.com/lightbulb.jpg"
                         },
                         new
                         {
                             ImageId = 3,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9110),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7096),
                             OwnerId = "username",
                             ProductId = 3,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9110),
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7097),
                             Url = "https://boomslag.s3.us-east-2.amazonaws.com/lightbulb.jpg"
                         },
                         new
                         {
                             ImageId = 4,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9127),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7115),
                             OwnerId = "username",
                             ProductId = 4,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9127),
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7115),
                             Url = "https://boomslag.s3.us-east-2.amazonaws.com/lightbulb.jpg"
                         });
                 });
@@ -205,6 +205,9 @@ namespace ProductAPI.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
+                    b.Property<decimal>("DiscountPrice")
+                        .HasColumnType("numeric");
+
                     b.Property<string>("Manufacturer")
                         .HasColumnType("text");
 
@@ -240,6 +243,11 @@ namespace ProductAPI.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<double>("TotalRevenue")
                         .HasColumnType("double precision");
 
@@ -269,8 +277,9 @@ namespace ProductAPI.Migrations
                             CategoryId = 3,
                             ClickThroughRate = 0.20000000000000001,
                             ConversionRate = 0.10000000000000001,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9060),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7048),
                             Description = "A microcontroller board based on the ATmega328 microcontroller.",
+                            DiscountPrice = 0m,
                             Manufacturer = "Arduino LLC",
                             Name = "Arduino Uno",
                             NumLikes = 500,
@@ -282,8 +291,9 @@ namespace ProductAPI.Migrations
                             OwnerId = "username",
                             Price = 29.99m,
                             Quantity = 10,
+                            Slug = "arduino-uno",
                             TotalRevenue = 499.89999999999998,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9061)
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7048)
                         },
                         new
                         {
@@ -293,8 +303,9 @@ namespace ProductAPI.Migrations
                             CategoryId = 1,
                             ClickThroughRate = 0.20000000000000001,
                             ConversionRate = 0.10000000000000001,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9087),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7073),
                             Description = "Its more than just a microcontroller!",
+                            DiscountPrice = 0m,
                             Manufacturer = "Raspberry Pi Foundation",
                             Name = "Raspberry Pi",
                             NumLikes = 450,
@@ -306,8 +317,9 @@ namespace ProductAPI.Migrations
                             OwnerId = "username",
                             Price = 19.99m,
                             Quantity = 10,
+                            Slug = "raspberry-pi",
                             TotalRevenue = 899.89999999999998,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9087)
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7073)
                         },
                         new
                         {
@@ -317,8 +329,9 @@ namespace ProductAPI.Migrations
                             CategoryId = 2,
                             ClickThroughRate = 0.20000000000000001,
                             ConversionRate = 0.10000000000000001,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9105),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7091),
                             Description = "Its better than the xbox",
+                            DiscountPrice = 0m,
                             Manufacturer = "Sony Electornics",
                             Name = "PlayStation 5",
                             NumLikes = 450,
@@ -330,8 +343,9 @@ namespace ProductAPI.Migrations
                             OwnerId = "username",
                             Price = 599.99m,
                             Quantity = 10,
+                            Slug = "playstation-5",
                             TotalRevenue = 899.89999999999998,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9105)
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7091)
                         },
                         new
                         {
@@ -341,8 +355,9 @@ namespace ProductAPI.Migrations
                             CategoryId = 2,
                             ClickThroughRate = 0.20000000000000001,
                             ConversionRate = 0.10000000000000001,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9121),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7110),
                             Description = "Anthenna for ethical hacking with kali linux",
+                            DiscountPrice = 0m,
                             Manufacturer = "Atheros",
                             Name = "Atheros 9271L",
                             NumLikes = 450,
@@ -354,8 +369,9 @@ namespace ProductAPI.Migrations
                             OwnerId = "username",
                             Price = 19.99m,
                             Quantity = 10,
+                            Slug = "atheros-9271l",
                             TotalRevenue = 899.89999999999998,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9122)
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7111)
                         });
                 });
 
@@ -397,37 +413,37 @@ namespace ProductAPI.Migrations
                         new
                         {
                             VideoId = 1,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9077),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7063),
                             OwnerId = "username",
                             ProductId = 1,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9078),
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7064),
                             Url = "https://www.youtube.com/watch?v=jDigbTQ7xAM"
                         },
                         new
                         {
                             VideoId = 2,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9098),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7084),
                             OwnerId = "username",
                             ProductId = 2,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9098),
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7084),
                             Url = "https://www.youtube.com/watch?v=jDigbTQ7xAM"
                         },
                         new
                         {
                             VideoId = 3,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9115),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7103),
                             OwnerId = "username",
                             ProductId = 3,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9115),
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7103),
                             Url = "https://www.youtube.com/watch?v=jDigbTQ7xAM"
                         },
                         new
                         {
                             VideoId = 4,
-                            CreatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9154),
+                            CreatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7119),
                             OwnerId = "username",
                             ProductId = 4,
-                            UpdatedAt = new DateTime(2022, 12, 26, 10, 21, 53, 198, DateTimeKind.Local).AddTicks(9154),
+                            UpdatedAt = new DateTime(2022, 12, 26, 21, 6, 39, 715, DateTimeKind.Utc).AddTicks(7120),
                             Url = "https://www.youtube.com/watch?v=jDigbTQ7xAM"
                         });
                 });
