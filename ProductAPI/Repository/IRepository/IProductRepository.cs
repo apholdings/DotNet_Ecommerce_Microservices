@@ -14,6 +14,7 @@ namespace ProductAPI.Repository.IRepository
 		Task<IEnumerable<Product>> SearchProductsAsync(string searchQuery, Pagination pagination, bool tracked = true);  // Add the pagination parameter here
 		Task<Product> UpdateAsync(Product entity, string userId);
 		Task<Product> GetByIdAsync(int id);
+		Task<IEnumerable<Product>> GetProductsByOwnerAsync(string ownerId, int pageSize = 0, int pageNumber = 1, string sortColumn = "", bool sortOrder = false);
 		Task<string> GetOwnerIdAsync(int id);
 		Task<bool> RemoveProductAsync(Product product);
 

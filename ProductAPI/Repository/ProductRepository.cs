@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using ProductAPI.Data;
 using ProductAPI.Models;
 using ProductAPI.Repository.IRepository;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ProductAPI.Repository
 {
@@ -171,6 +172,79 @@ namespace ProductAPI.Repository
 			return product;
 		}
 
+		public async Task<IEnumerable<Product>> GetProductsByOwnerAsync(string ownerId, int pageSize, int pageNumber, string sortColumn, bool sortOrder)
+		{
+			try
+			{
+				// Validate the pagination parameters
+				if (pageSize <= 0)
+				{
+					throw new ArgumentOutOfRangeException(nameof(pageSize), "The pageSize parameter must be greater than zero.");
+				}
+
+				if (pageNumber <= 0)
+				{
+					throw new ArgumentOutOfRangeException(nameof(pageNumber), "The pageNumber parameter must be greater than zero.");
+				}
+
+				// Build the cache key
+				string cacheKey = $"products_by_owner_{ownerId}_{pageSize}_{pageNumber}";
+
+				// Check if the results are already cached
+				if (_cache.TryGetValue(cacheKey, out IEnumerable<Product> products))
+				{
+					// Return the cached results
+					return products;
+				}
+
+				// Build the query
+				IQueryable<Product> query = _db.Products
+					.Include(p => p.Category)  // Include the Category navigation property
+					.Include(p => p.Images)  // Include the Images navigation property
+					.Include(p => p.Videos)  // Include the Videos navigation property
+					.AsQueryable();
+
+
+				// Implement sorting logic here using the sortColumn and sortOrder parameters
+				if (sortColumn == "owner")
+				{
+					query = sortOrder ? query.OrderBy(p => p.OwnerId) : query.OrderByDescending(p => p.OwnerId);
+				}
+				else if (sortColumn == "name")
+				{
+					query = sortOrder ? query.OrderBy(p => p.Name) : query.OrderByDescending(p => p.Name);
+				}
+				else if (sortColumn == "priceRange")
+				{
+					query = sortOrder ? query.OrderBy(p => p.Price) : query.OrderByDescending(p => p.Price);
+				}
+				else if (sortColumn == "category")
+				{
+					query = sortOrder ? query.OrderBy(p => p.CategoryId) : query.OrderByDescending(p => p.CategoryId);
+				}
+				else if (sortColumn == "onSale")
+				{
+					query = sortOrder ? query.OrderBy(p => p.OnSale) : query.OrderByDescending(p => p.OnSale);
+				}
+				else if (sortColumn == "averageRating")
+				{
+					query = sortOrder ? query.OrderBy(p => p.AverageRating) : query.OrderByDescending(p => p.AverageRating);
+				}
+
+				// Execute the query and cache the results
+				products = await query.ToListAsync();
+				_cache.Set(cacheKey, products, TimeSpan.FromMinutes(5));
+
+				return products;
+			}
+			catch (Exception ex)
+			{
+				// Handle the exception
+				Console.WriteLine(ex.Message);
+				return null;
+			}
+		}
+		
 		public async Task<IEnumerable<Product>> GetProductsByAverageRatingAsync(double averageRating, int pageSize = 0, int pageNumber = 1, string sortColumn = "", bool sortOrder = false, bool tracked = true)
 		{
 			// Build the cache key based on the pagination and sorting parameters
