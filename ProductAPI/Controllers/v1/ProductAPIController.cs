@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProductAPI.Models;
@@ -306,6 +307,30 @@ namespace ProductAPI.Controllers.v1
 			}
 			return response;
 		}
+
+
+
+		[HttpPatch("{id:int}")]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		public async Task<ActionResult<APIResponse>> PatchProduct(int id, [FromBody] JsonPatchDocument<ProductUpdateDTO> patchDoc)
+		{
+			var existingProduct = await _dbProducts.GetByIdAsync(id);
+
+			if (existingProduct == null)
+			{
+				return NotFound();
+			}
+
+			var productUpdateDTO = _mapper.Map<ProductUpdateDTO>(existingProduct);
+			patchDoc.ApplyTo(productUpdateDTO);
+
+			_mapper.Map(productUpdateDTO, existingProduct);
+
+			await _dbProducts.UpdateAsync(existingProduct);
+			return NoContent();
+		}
+
 
 
 		[HttpGet("category/{categoryId}")]

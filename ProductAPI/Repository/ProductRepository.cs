@@ -1028,18 +1028,17 @@ namespace ProductAPI.Repository
 			return products;
 		}
 
-		public async Task<Product> UpdateAsync(Product entity, string userId)
+		public async Task UpdateAsync(Product product, string userId)
 		{
-			// Check if the product owner is the one updating the product
-			if (entity.OwnerId != userId)
-			{
-				throw new Exception("Unauthorized update attempt");
-			}
+			var existingProduct = await _db.Products.GetByIdAsync(product.ProductId);
+			existingProduct.Name = product.Name;
+			existingProduct.Description = product.Description;
+			// Update other fields as needed
+			existingProduct.UpdatedBy = userId;
+			existingProduct.UpdatedOn = DateTime.UtcNow;
 
-			entity.UpdatedAt = DateTime.Now;
-			_db.Products.Update(entity);
+			_db.Products.Update(existingProduct);
 			await _db.SaveChangesAsync();
-			return entity;
 		}
 
 		public async Task<string> GetOwnerIdAsync(int productId)
