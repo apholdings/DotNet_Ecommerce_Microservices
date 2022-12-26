@@ -1,4 +1,5 @@
-﻿using ProductAPI.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using ProductAPI.Models;
 
 namespace ProductAPI.Repository.IRepository
 {
@@ -6,10 +7,15 @@ namespace ProductAPI.Repository.IRepository
 	{
 		Task<IEnumerable<Product>> GetProductsForCategoryAsync(int categoryId, int pageSize = 0, int pageNumber = 1, string sortColumn = "", bool sortOrder = false, bool tracked = true);
 		Task<int> CountAsync();
+		Task CreateProductAsync(Product product);
 		Task<IEnumerable<Product>> GetAllAsync(int pageSize = 0, int pageNumber = 1, string sortColumn = "", bool sortOrder = false);
 		Task<Product> GetProductByNameAsync(string productName, int cacheDuration, bool tracked = true);
+		Task<Product> GetProductByIdAsync(int id, bool tracked = true);
 		Task<IEnumerable<Product>> SearchProductsAsync(string searchQuery, Pagination pagination, bool tracked = true);  // Add the pagination parameter here
-		Task<Product> UpdateAsync(Product entity);
+		Task<Product> UpdateAsync(Product entity, string userId);
+		Task<Product> GetByIdAsync(int id);
+		Task<string> GetOwnerIdAsync(int id);
+		Task<bool> RemoveProductAsync(Product product);
 
 		// Query products by AverageRating
 		Task<IEnumerable<Product>> GetProductsByAverageRatingAsync(double averageRating, int pageSize = 0, int pageNumber = 1, string sortColumn = "", bool sortOrder = false, bool tracked = true);

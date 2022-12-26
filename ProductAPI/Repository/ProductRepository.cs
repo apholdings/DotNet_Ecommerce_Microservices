@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using ProductAPI.Data;
 using ProductAPI.Models;
@@ -94,6 +95,51 @@ namespace ProductAPI.Repository
 			return products;
 		}
 
+		public async Task<Product> GetByIdAsync(int id)
+		{
+			// Build the cache key
+			string cacheKey = $"product_{id}";
+
+			// Check if the product is already cached
+			if (_cache.TryGetValue(cacheKey, out Product product))
+			{
+				// Return the cached product
+				return product;
+			}
+
+			try
+			{
+				// Query the database for the product
+				product = await _db.Products
+					.Include(p => p.Category)
+					.Include(p => p.Images)
+					.Include(p => p.Videos)
+					.SingleOrDefaultAsync(p => p.ProductId == id);
+
+				// Validate the product
+				if (product == null)
+				{
+					throw new Exception("Product not found");
+				}
+
+				// Set the cache options
+				var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60));
+
+				// Save the product in cache
+				_cache.Set(cacheKey, product, cacheEntryOptions);
+
+				return product;
+			}
+			catch (Exception ex)
+			{
+				// Log the error
+				//_logger.LogError(ex.ToString());
+
+				// Return null to indicate that the product could not be retrieved
+				return null;
+			}
+		}
+
 		public async Task<Product> GetProductByNameAsync(string productName, int cacheDuration, bool tracked = true)
 		{
 			// Build the cache key
@@ -184,7 +230,7 @@ namespace ProductAPI.Repository
 			products = await query.ToListAsync();
 
 			// Set the cache options
-			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(60));
+			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60));
 
 			// Save the results in cache
 			_cache.Set(cacheKey, products, cacheEntryOptions);
@@ -251,7 +297,7 @@ namespace ProductAPI.Repository
 			products = await query.ToListAsync();
 
 			// Set the cache options
-			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(60));
+			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60));
 
 			// Save the results in cache
 			_cache.Set(cacheKey, products, cacheEntryOptions);
@@ -318,7 +364,7 @@ namespace ProductAPI.Repository
 			products = await query.ToListAsync();
 
 			// Set the cache options
-			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(60));
+			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60));
 
 			// Save the results in cache
 			_cache.Set(cacheKey, products, cacheEntryOptions);
@@ -385,7 +431,7 @@ namespace ProductAPI.Repository
 			products = await query.ToListAsync();
 
 			// Set the cache options
-			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(60));
+			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60));
 
 			// Save the results in cache
 			_cache.Set(cacheKey, products, cacheEntryOptions);
@@ -452,7 +498,7 @@ namespace ProductAPI.Repository
 			products = await query.ToListAsync();
 
 			// Set the cache options
-			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(60));
+			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60));
 
 			// Save the results in cache
 			_cache.Set(cacheKey, products, cacheEntryOptions);
@@ -519,7 +565,7 @@ namespace ProductAPI.Repository
 			products = await query.ToListAsync();
 
 			// Set the cache options
-			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(60));
+			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60));
 
 			// Save the results in cache
 			_cache.Set(cacheKey, products, cacheEntryOptions);
@@ -586,7 +632,7 @@ namespace ProductAPI.Repository
 			products = await query.ToListAsync();
 
 			// Set the cache options
-			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(60));
+			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60));
 
 			// Save the results in cache
 			_cache.Set(cacheKey, products, cacheEntryOptions);
@@ -653,7 +699,7 @@ namespace ProductAPI.Repository
 			products = await query.ToListAsync();
 
 			// Set the cache options
-			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(60));
+			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60));
 
 			// Save the results in cache
 			_cache.Set(cacheKey, products, cacheEntryOptions);
@@ -720,7 +766,7 @@ namespace ProductAPI.Repository
 			products = await query.ToListAsync();
 
 			// Set the cache options
-			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(60));
+			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60));
 
 			// Save the results in cache
 			_cache.Set(cacheKey, products, cacheEntryOptions);
@@ -787,7 +833,7 @@ namespace ProductAPI.Repository
 			products = await query.ToListAsync();
 
 			// Set the cache options
-			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(60));
+			var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(60));
 
 			// Save the results in cache
 			_cache.Set(cacheKey, products, cacheEntryOptions);
@@ -908,12 +954,187 @@ namespace ProductAPI.Repository
 			return products;
 		}
 
-		public async Task<Product> UpdateAsync(Product entity)
+		public async Task<Product> UpdateAsync(Product entity, string userId)
 		{
+			// Check if the product owner is the one updating the product
+			if (entity.OwnerId != userId)
+			{
+				throw new Exception("Unauthorized update attempt");
+			}
+
 			entity.UpdatedAt = DateTime.Now;
 			_db.Products.Update(entity);
 			await _db.SaveChangesAsync();
 			return entity;
 		}
+
+		public async Task<string> GetOwnerIdAsync(int productId)
+		{
+			// Retrieve the product with the specified id
+			var product = await dbSet.FindAsync(productId);
+			if (product == null)
+			{
+				throw new InvalidOperationException($"Product with id {productId} not found");
+			}
+
+			// Check if the product has a property named "OwnerId"
+			var property = product.GetType().GetProperty("OwnerId");
+			if (property == null)
+			{
+				throw new InvalidOperationException("Product does not have a property named 'OwnerId'");
+			}
+
+			// Use the memory cache to store the "OwnerId" value for the product
+			string cacheKey = $"{typeof(Product).Name}-{productId}-OwnerId";
+			string ownerId = _cache.Get<string>(cacheKey);
+			if (string.IsNullOrEmpty(ownerId))
+			{
+				ownerId = (string)property.GetValue(product);
+				if (string.IsNullOrEmpty(ownerId))
+				{
+					throw new InvalidOperationException("OwnerId is null or empty");
+				}
+
+				// Store the "OwnerId" value in the cache for 1 hour
+				_cache.Set(cacheKey, ownerId, TimeSpan.FromHours(1));
+			}
+
+			return ownerId;
+		}
+
+		public async Task CreateProductAsync(Product product)
+		{
+			try
+			{
+				// Set the video and image IDs
+				int maxVideoId = _db.Videos.Max(v => v.VideoId);
+				int maxImageId = _db.Images.Max(i => i.ImageId);
+
+				if (product.Videos == null)
+				{
+					product.Videos = new List<Video>();
+				}
+				if (product.Images == null)
+				{
+					product.Images = new List<Image>();
+				}
+				if (product.Videos != null)
+				{
+					foreach (var video in product.Videos)
+					{
+						video.VideoId = maxVideoId == 0 ? 1 : ++maxVideoId; // Set the VideoId to 1 if the database is empty, otherwise increment the maxVideoId by 1
+						video.ProductId = product.ProductId;
+						video.OwnerId = product.OwnerId; // Add the ownerId to the video
+					}
+				}
+				if (product.Images != null)
+				{
+					foreach (var image in product.Images)
+					{
+						image.ImageId = maxImageId == 0 ? 1 : ++maxImageId; // Set the ImageId to 1 if the database is empty, otherwise increment the maxImageId by 1
+						image.ProductId = product.ProductId;
+						image.OwnerId = product.OwnerId; // Add the ownerId to the image
+					}
+				}
+
+				// Get the highest ProductId from the database
+				int maxProductId = _db.Products.Max(p => p.ProductId);
+
+				// Set the ProductId of the product based on the highest ProductId
+				product.ProductId = maxProductId + 1;
+
+				// Add the product, videos, and images to the database and save changes
+				await _db.Products.AddAsync(product);
+				if (product.Videos != null)
+				{
+					await _db.Videos.AddRangeAsync(product.Videos);
+				}
+				if (product.Images != null)
+				{
+					await _db.Images.AddRangeAsync(product.Images);
+				}
+				await _db.SaveChangesAsync();
+			}
+			catch (Exception ex)
+			{
+				// Handle the exception
+				Console.WriteLine(ex.Message);
+			}
+		}
+
+		public async Task<Product> GetProductByIdAsync(int id, bool tracked = true)
+		{
+			// Get the product from the database
+			var product = await _db.Products
+				.Include(p => p.Category)  // Include the Category navigation property
+				.Include(p => p.Images)  // Include the Images navigation property
+				.Include(p => p.Videos)  // Include the Videos navigation property
+				.Where(p => p.ProductId == id)
+				.FirstOrDefaultAsync();
+
+			if (!tracked)
+			{
+				_db.Entry(product).State = EntityState.Detached;
+			}
+
+			return product;
+		}
+
+		public async Task<bool> RemoveProductAsync(Product product)
+		{
+			try
+			{
+				// Check if the product exists in the database
+				if (!_db.Products.Contains(product))
+				{
+					throw new Exception("Product does not exist in the database.");
+				}
+
+				// Check if the product has any associated videos
+				if (product.Videos != null && product.Videos.Count > 0)
+				{
+					// Remove the associated videos from the database
+					_db.Videos.RemoveRange(product.Videos);
+					await _db.SaveChangesAsync();
+				}
+
+				// Check if the product has any associated images
+				if (product.Images != null && product.Images.Count > 0)
+				{
+					// Remove the associated images from the database
+					_db.Images.RemoveRange(product.Images);
+					await _db.SaveChangesAsync();
+				}
+
+				// Remove the product and its associated images and videos from the database
+				_db.Products.Remove(product);
+				await _db.SaveChangesAsync();
+
+				// Invalidate the cache for the GetAllAsync method
+				_cache.Remove("products_*");  // remove all cached results for the GetAllAsync method
+
+				return true;
+			}
+			catch (Exception ex)
+			{
+				// Handle the exception
+				Console.WriteLine(ex.Message);
+				return false;
+			}
+		}
+
+		//public async Task<bool> IsAuthorizedToCreateProduct(string userId)
+		//{
+		//	// Retrieve the user with the specified id
+		//	var user = await _db.Users.FindAsync(userId);
+		//	if (user == null)
+		//	{
+		//		return false;
+		//	}
+
+		//	// Check if the user has the "ProductCreator" role
+		//	return await _db.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.RoleId == "ProductCreator");
+		//}
+
 	}
 }

@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using ProductAPI.Data;
 using ProductAPI.Repository.IRepository;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ProductAPI.Repository
 {
@@ -9,10 +11,18 @@ namespace ProductAPI.Repository
 	{
 		private readonly ApplicationDbContext _db;
 		internal DbSet<T> dbSet;
-		public Repository(ApplicationDbContext db)
+		private ApplicationDbContext db;
+		private readonly IMemoryCache _memoryCache;
+		public Repository(ApplicationDbContext db, IMemoryCache memoryCache)
 		{
 			_db = db;
+			_memoryCache = memoryCache;
 			this.dbSet = _db.Set<T>();
+		}
+
+		public Repository(ApplicationDbContext db)
+		{
+			this.db = db;
 		}
 
 		public async Task CreateAsync(T entity)
@@ -71,5 +81,7 @@ namespace ProductAPI.Repository
 		{
 			await _db.SaveChangesAsync();
 		}
+
+		
 	}
 }

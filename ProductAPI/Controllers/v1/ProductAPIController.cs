@@ -19,11 +19,17 @@ namespace ProductAPI.Controllers.v1
 		protected APIResponse _response;
 		private readonly ILogger<ProductAPIController> _logger;
 		private readonly IProductRepository _dbProducts;
+		private readonly ICategoryRepository _dbCategories;
 		private readonly IMapper _mapper;
 
-		public ProductAPIController(IProductRepository dbProducts, ILogger<ProductAPIController> logger, IMapper mapper)
+		public ProductAPIController(
+			IProductRepository dbProducts, 
+			ICategoryRepository dbCategories, 
+			ILogger<ProductAPIController> logger, 
+			IMapper mapper)
 		{
 			_dbProducts = dbProducts;
+			_dbCategories = dbCategories;
 			_logger = logger;
 			_mapper = mapper;
 			_response = new();
@@ -32,7 +38,7 @@ namespace ProductAPI.Controllers.v1
 		private readonly IList<string> _validSortColumns = new List<string> { "owner", "name", "priceRange", "category", "onSale", "averageRating" };
 
 
-		[HttpGet]
+		[HttpGet(Name = "ListProducts")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		public async Task<ActionResult<APIResponse>> GetAll([FromQuery] Pagination pagination, [Required] string sortColumn, bool sortOrder = false)
@@ -90,6 +96,9 @@ namespace ProductAPI.Controllers.v1
 		}
 
 
+		
+
+
 		[HttpGet("search")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -139,7 +148,7 @@ namespace ProductAPI.Controllers.v1
 		}
 
 
-		[HttpGet("{productName}")]
+		[HttpGet("{productName}", Name = "GetProduct")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<APIResponse>> GetProduct(string productName)
@@ -176,6 +185,138 @@ namespace ProductAPI.Controllers.v1
 				return StatusCode((int)HttpStatusCode.InternalServerError, _response);
 			}
 
+		}
+
+		// CREATE
+		[HttpPost]
+		[ProducesResponseType(StatusCodes.Status201Created)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+		public async Task<ActionResult<APIResponse>> CreateProduct([FromBody] ProductCreateDTO createDTO)
+		{
+			try
+			{
+				if (createDTO == null)
+				{
+					return BadRequest(createDTO);
+				}
+
+				// Check if the category exists
+				//var category = await _dbCategories.GetByIdAsync(createDTO.CategoryId);
+				//if (category == null)
+				//{
+				//	return BadRequest("Invalid category");
+				//}
+
+				Product product = _mapper.Map<Product>(createDTO);
+
+				await _dbProducts.CreateProductAsync(product);
+
+				_response.Result = _mapper.Map<ProductDTO>(product);
+				_response.StatusCode = HttpStatusCode.Created;
+				_response.IsSuccess = true;
+				return CreatedAtRoute("GetProduct", new { productName = product.Name }, _response);
+			}
+			catch (Exception ex)
+			{
+				_response.IsSuccess = false;
+				_response.StatusCode = HttpStatusCode.BadRequest;
+				_response.ErrorMessages = new List<string>() { ex.ToString() };
+			}
+			return _response;
+		}
+		//[HttpPost]
+		//public async Task<IActionResult> CreateProduct([FromBody] Product model)
+		//{
+		//	// Validate the input model
+		//	if (!ModelState.IsValid)
+		//	{
+		//		return BadRequest(ModelState);
+		//	}
+
+		//	// Check if the user is authorized to create a product
+		//	// You'll need to implement this check yourself
+		//	if (!await IsAuthorizedToCreateProduct())
+		//	{
+		//		return Unauthorized();
+		//	}
+
+		//	// Set the owner id of the product to the current user's id
+		//	// You'll need to implement this yourself
+		//	model.OwnerId = GetCurrentUserId();
+
+		//	// Create the product
+		//	await _dbProducts.CreateAsync(model);
+
+		//	return Ok();
+		//}
+
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> DeleteProduct(int id)
+		{
+			// Get the product from the database
+			var product = await _dbProducts.GetProductByIdAsync(id);
+
+			// Check if the product exists
+			if (product == null)
+			{
+				return NotFound();
+			}
+
+			// Remove the product and its associated images and videos
+			bool success = await _dbProducts.RemoveProductAsync(product);
+
+			if (!success)
+			{
+				return StatusCode(500, "An error occurred while deleting the product.");
+			}
+
+			return NoContent();
+		}
+
+
+		[HttpPut("{id:int}", Name = "UpdateProduct")]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		public async Task<ActionResult<APIResponse>> UpdateProduct(int id, string userId, [FromBody] ProductUpdateDTO updateDTO)
+		{
+			var response = new APIResponse();
+			try
+			{
+				// Validate the request data
+				if (updateDTO == null || id != updateDTO.ProductId)
+				{
+					response.StatusCode = HttpStatusCode.BadRequest;
+					response.IsSuccess = false;
+					return response;
+				}
+
+				// Check if the product exists
+				var existingProduct = await _dbProducts.GetByIdAsync(id);
+				if (existingProduct == null)
+				{
+					response.StatusCode = HttpStatusCode.NotFound;
+					response.IsSuccess = false;
+					return response;
+				}
+
+				// Map the updateDTO to the existing product using AutoMapper
+				_mapper.Map(updateDTO, existingProduct);
+
+				// Update the product
+				await _dbProducts.UpdateAsync(existingProduct, userId);
+
+				response.StatusCode = HttpStatusCode.NoContent;
+				response.IsSuccess = true;
+				return response;
+			}
+			catch (Exception ex)
+			{
+				response.IsSuccess = false;
+				response.StatusCode = HttpStatusCode.BadRequest;
+				response.ErrorMessages = new List<string>() { ex.ToString() };
+			}
+			return response;
 		}
 
 
