@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -152,7 +153,7 @@ namespace ProductAPI.Controllers.v1
 		}
 
 
-		[HttpGet("{productId}", Name = "GetProduct")]
+		[HttpGet("{slug}", Name = "GetProduct")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<APIResponse>> GetProduct(string slug)
@@ -190,55 +191,33 @@ namespace ProductAPI.Controllers.v1
 
 		}
 
-		// CREATE
 		[HttpPost]
 		[ProducesResponseType(StatusCodes.Status201Created)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-		public async Task<ActionResult<APIResponse>> CreateProduct([FromBody] ProductCreateDTO createDTO)
+		public async Task<ActionResult<APIResponse>> CreateProduct([FromBody] ProductCreateDTO productDTO)
 		{
-			try
+			// Call the CreateProductAsync method to create the product
+			var apiResponse = await _dbProducts.CreateProductAsync(productDTO);
+
+			// Check if the request was successful
+			if (apiResponse.IsSuccess)
 			{
-				if (createDTO == null)
-				{
-					return BadRequest(createDTO);
-				}
+				// Map the created product to a product DTO
+				var createdProduct = (Product)apiResponse.Result;
+				var productDto = _mapper.Map<ProductDTO>(createdProduct);
 
-				// Check if the category exists
-				//var category = await _dbCategories.GetByIdAsync(createDTO.CategoryId);
-				//if (category == null)
-				//{
-				//	return BadRequest("Invalid category");
-				//}
-
-				//	// Check if the user is authorized to create a product
-				//	// You'll need to implement this check yourself
-				//	if (!await IsAuthorizedToCreateProduct())
-				//	{
-				//		return Unauthorized();
-				//	}
-
-				//	// Set the owner id of the product to the current user's id
-				//	// You'll need to implement this yourself
-				//	model.OwnerId = GetCurrentUserId();
-
-				Product product = _mapper.Map<Product>(createDTO);
-
-				await _dbProducts.CreateProductAsync(product);
-
-				_response.Result = _mapper.Map<ProductDTO>(product);
-				_response.StatusCode = HttpStatusCode.Created;
-				_response.IsSuccess = true;
-				return CreatedAtRoute("GetProduct", new { slug = product.Slug }, _response);
+				// Set the response data and return it
+				apiResponse.Result = productDto;
+				return CreatedAtRoute("GetProduct", new { slug = createdProduct.Slug }, apiResponse);
 			}
-			catch (Exception ex)
+			else
 			{
-				_response.IsSuccess = false;
-				_response.StatusCode = HttpStatusCode.BadRequest;
-				_response.ErrorMessages = new List<string>() { ex.ToString() };
+				// Return the error response
+				return StatusCode((int)apiResponse.StatusCode, apiResponse);
 			}
-			return _response;
 		}
+
 
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteProduct(int id)
@@ -1000,7 +979,6 @@ namespace ProductAPI.Controllers.v1
 				return StatusCode(500, _response);
 			}
 		}
-
 
 	}
 }

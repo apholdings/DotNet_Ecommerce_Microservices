@@ -1,26 +1,30 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Pipelines.Sockets.Unofficial.Buffers;
 using ProductAPI.Data;
 using ProductAPI.Models;
+using ProductAPI.Models.DTO.ProductDtos;
 using ProductAPI.Repository.IRepository;
 using System;
+using System.Net;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ProductAPI.Repository
 {
     public class ProductRepository : Repository<Product>, IProductRepository
 	{
-
+		private readonly IMapper _mapper;
 		private readonly ApplicationDbContext _db;
 		private readonly IMemoryCache _cache;
 		private readonly IList<string> _validSortColumns = new List<string> { "owner", "name", "priceRange", "category", "onSale", "averageRating" };
 		
-		public ProductRepository(ApplicationDbContext db, IMemoryCache cache) : base(db)
+		public ProductRepository(ApplicationDbContext db, IMapper mapper, IMemoryCache cache) : base(db)
 		{
 			_db = db;
 			_cache = cache;
+			_mapper = mapper;
 		}
 
 		public async Task<int> CountAsync()
@@ -1065,60 +1069,82 @@ namespace ProductAPI.Repository
 			return ownerId;
 		}
 
-		public async Task CreateProductAsync(Product product)
+		public async Task<APIResponse> CreateProductAsync(ProductCreateDTO productDTO)
 		{
-			// Set the video and image IDs
-			int maxVideoId = _db.Videos.Max(v => v.VideoId);
-			int maxImageId = _db.Images.Max(i => i.ImageId);
+			try
+			{
 
-			if (product.Videos == null)
-			{
-				product.Videos = new List<Video>();
-			}
-			if (product.Images == null)
-			{
-				product.Images = new List<Image>();
-			}
-			if (product.Videos != null)
-			{
-				foreach (var video in product.Videos)
+				// Use Automapper to map the ProductCreateDTO to a Product entity
+				var product = _mapper.Map<Product>(productDTO);
+
+				// Set the slug based on the name of the product
+				product.GenerateSlug(_db);
+
+				// Set the video and image IDs
+				int maxVideoId = _db.Videos.Max(v => v.VideoId);
+				int maxImageId = _db.Images.Max(i => i.ImageId);
+
+				if (product.Videos == null)
 				{
-					video.VideoId = maxVideoId == 0 ? 1 : ++maxVideoId; // Set the VideoId to 1 if the database is empty, otherwise increment the maxVideoId by 1
-					video.ProductId = product.ProductId;
-					video.OwnerId = product.OwnerId; // Add the ownerId to the video
+					product.Videos = new List<Video>();
 				}
-			}
-			if (product.Images != null)
-			{
-				foreach (var image in product.Images)
+				if (product.Images == null)
 				{
-					image.ImageId = maxImageId == 0 ? 1 : ++maxImageId; // Set the ImageId to 1 if the database is empty, otherwise increment the maxImageId by 1
-					image.ProductId = product.ProductId;
-					image.OwnerId = product.OwnerId; // Add the ownerId to the image
+					product.Images = new List<Image>();
 				}
+				if (product.Videos != null)
+				{
+					foreach (var video in product.Videos)
+					{
+						video.VideoId = maxVideoId == 0 ? 1 : ++maxVideoId; // Set the VideoId to 1 if the database is empty, otherwise increment the maxVideoId by 1
+						video.ProductId = product.ProductId;
+						video.OwnerId = product.OwnerId; // Add the ownerId to the video
+					}
+				}
+				if (product.Images != null)
+				{
+					foreach (var image in product.Images)
+					{
+						image.ImageId = maxImageId == 0 ? 1 : ++maxImageId; // Set the ImageId to 1 if the database is empty, otherwise increment the maxImageId by 1
+						image.ProductId = product.ProductId;
+						image.OwnerId = product.OwnerId; // Add the ownerId to the image
+					}
+				}
+
+				// Get the highest ProductId from the database
+				int maxProductId = _db.Products.Max(p => p.ProductId);
+
+				// Set the ProductId of the product based on the highest ProductId
+				product.ProductId = maxProductId + 1;
+
+				// Add the product, videos, and images to the database and save changes
+				await _db.Products.AddAsync(product);
+				if (product.Videos != null)
+				{
+					await _db.Videos.AddRangeAsync(product.Videos);
+				}
+				if (product.Images != null)
+				{
+					await _db.Images.AddRangeAsync(product.Images);
+				}
+				await _db.SaveChangesAsync();
+
+				return new APIResponse
+				{
+					Result = product,
+					StatusCode = HttpStatusCode.Created
+				};
 			}
-
-			// Generate the slug for the product
-			product.GenerateSlug();
-
-			// Get the highest ProductId from the database
-			int maxProductId = _db.Products.Max(p => p.ProductId);
-
-			// Set the ProductId of the product based on the highest ProductId
-			product.ProductId = maxProductId + 1;
-
-			// Add the product, videos, and images to the database and save changes
-			await _db.Products.AddAsync(product);
-			if (product.Videos != null)
+			catch (Exception ex)
 			{
-				await _db.Videos.AddRangeAsync(product.Videos);
+				//_logger.LogError(ex, "Error creating product");
+				return new APIResponse
+				{
+					IsSuccess = false,
+					ErrorMessages = new List<string> { ex.Message },
+					StatusCode = HttpStatusCode.InternalServerError
+				};
 			}
-			if (product.Images != null)
-			{
-				await _db.Images.AddRangeAsync(product.Images);
-			}
-			await _db.SaveChangesAsync();
-			
 		}
 
 		public async Task<Product> GetProductByIdAsync(int id, bool tracked = true)

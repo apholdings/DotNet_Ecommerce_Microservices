@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using ProductAPI.Data;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -17,13 +19,23 @@ namespace ProductAPI.Models
 		[StringLength(255, ErrorMessage = "Slug must be at most 255 characters long.")]
 		[Required(ErrorMessage = "Slug is required.")]
 		public string Slug { get; set; }
-		public void GenerateSlug()
+		public void GenerateSlug(ApplicationDbContext context)
 		{
-			// Replace spaces with hyphens and convert to lowercase
-			Slug = Name.Replace(" ", "-").ToLowerInvariant();
+			// Set the slug based on the name of the product
+			Slug = Name.ToLower().Replace(" ", "-");
 
-			// Remove any invalid characters
-			Slug = Regex.Replace(Slug, @"[^a-z0-9-]", "");
+			// Check if the slug already exists in the database
+			int count = 1;
+			Product productWithSameSlug = context.Products.FirstOrDefault(p => p.Slug == Slug && p.ProductId != ProductId); // Modify this line to exclude the current product from the query
+			while (productWithSameSlug != null)
+			{
+				// Modify the slug by adding a number at the end
+				Slug = $"{Slug}-{count}";
+
+				// Check if the modified slug already exists in the database
+				productWithSameSlug = context.Products.FirstOrDefault(p => p.Slug == Slug && p.ProductId != ProductId); // Modify this line to exclude the current product from the query
+				count++;
+			}
 		}
 
 		[StringLength(2000)]

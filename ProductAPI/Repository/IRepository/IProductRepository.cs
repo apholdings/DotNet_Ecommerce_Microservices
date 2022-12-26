@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductAPI.Models;
+using ProductAPI.Models.DTO.ProductDtos;
 
 namespace ProductAPI.Repository.IRepository
 {
@@ -7,7 +8,7 @@ namespace ProductAPI.Repository.IRepository
 	{
 		Task<IEnumerable<Product>> GetProductsForCategoryAsync(int categoryId, int pageSize = 0, int pageNumber = 1, string sortColumn = "", bool sortOrder = false, bool tracked = true);
 		Task<int> CountAsync();
-		Task CreateProductAsync(Product product);
+		Task<APIResponse> CreateProductAsync(ProductCreateDTO productDTO);
 		Task<Product> UpdateAsync(Product entity, string ownerId);
 		Task<Product> PatchAsync(Product entity, string ownerId);
 
