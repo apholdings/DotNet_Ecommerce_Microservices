@@ -264,74 +264,6 @@ namespace ProductAPI.Controllers.v1
 		}
 
 
-		[HttpPut("{id:int}", Name = "UpdateProduct")]
-		[ProducesResponseType(StatusCodes.Status204NoContent)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		public async Task<ActionResult<APIResponse>> UpdateProduct(int id, string userId, [FromBody] ProductUpdateDTO updateDTO)
-		{
-			var response = new APIResponse();
-			try
-			{
-				// Validate the request data
-				if (updateDTO == null || id != updateDTO.ProductId)
-				{
-					response.StatusCode = HttpStatusCode.BadRequest;
-					response.IsSuccess = false;
-					return response;
-				}
-
-				// Check if the product exists
-				var existingProduct = await _dbProducts.GetByIdAsync(id);
-				if (existingProduct == null)
-				{
-					response.StatusCode = HttpStatusCode.NotFound;
-					response.IsSuccess = false;
-					return response;
-				}
-
-				// Map the updateDTO to the existing product using AutoMapper
-				_mapper.Map(updateDTO, existingProduct);
-
-				// Update the product
-				await _dbProducts.UpdateAsync(existingProduct, userId);
-
-				response.StatusCode = HttpStatusCode.NoContent;
-				response.IsSuccess = true;
-				return CreatedAtRoute("UpdateProduct", null, _response);
-			}
-			catch (Exception ex)
-			{
-				response.IsSuccess = false;
-				response.StatusCode = HttpStatusCode.BadRequest;
-				response.ErrorMessages = new List<string>() { ex.ToString() };
-			}
-			return response;
-		}
-
-
-
-		[HttpPatch("{id:int}")]
-		[ProducesResponseType(StatusCodes.Status204NoContent)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		public async Task<ActionResult<APIResponse>> PatchProduct(int id, [FromBody] JsonPatchDocument<ProductUpdateDTO> patchDoc)
-		{
-			var existingProduct = await _dbProducts.GetByIdAsync(id);
-
-			if (existingProduct == null)
-			{
-				return NotFound();
-			}
-
-			var productUpdateDTO = _mapper.Map<ProductUpdateDTO>(existingProduct);
-			patchDoc.ApplyTo(productUpdateDTO);
-
-			_mapper.Map(productUpdateDTO, existingProduct);
-
-			await _dbProducts.UpdateAsync(existingProduct);
-			return NoContent();
-		}
-
-
 
 		[HttpGet("category/{categoryId}")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
@@ -431,7 +363,7 @@ namespace ProductAPI.Controllers.v1
 			// Query the database and map the results to ProductDTO objects
 			try
 			{
-				var products = await _dbProducts.GetProductsByAverageRatingAsync(averageRating, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder,tracked);
+				var products = await _dbProducts.GetProductsByAverageRatingAsync(averageRating, pageSize: pagination.PageSize, pageNumber: pagination.PageNumber, sortColumn: sortColumn, sortOrder: sortOrder, tracked);
 				var productDTOs = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
 				// Calculate the total number of pages and total number of items
@@ -512,7 +444,7 @@ namespace ProductAPI.Controllers.v1
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 
-		public async Task<ActionResult<IEnumerable<Product>>> ListByCTR([Required] double clickThroughRate,  [FromQuery] Pagination pagination, [Required] string sortColumn = "", bool sortOrder = false, bool tracked = true)
+		public async Task<ActionResult<IEnumerable<Product>>> ListByCTR([Required] double clickThroughRate, [FromQuery] Pagination pagination, [Required] string sortColumn = "", bool sortOrder = false, bool tracked = true)
 		{
 			// Validate the sortColumn parameter
 			if (string.IsNullOrEmpty(sortColumn))
@@ -979,6 +911,8 @@ namespace ProductAPI.Controllers.v1
 				return StatusCode(500, _response);
 			}
 		}
+
+
 
 
 	}

@@ -1028,18 +1028,6 @@ namespace ProductAPI.Repository
 			return products;
 		}
 
-		public async Task UpdateAsync(Product product, string userId)
-		{
-			var existingProduct = await _db.Products.GetByIdAsync(product.ProductId);
-			existingProduct.Name = product.Name;
-			existingProduct.Description = product.Description;
-			// Update other fields as needed
-			existingProduct.UpdatedBy = userId;
-			existingProduct.UpdatedOn = DateTime.UtcNow;
-
-			_db.Products.Update(existingProduct);
-			await _db.SaveChangesAsync();
-		}
 
 		public async Task<string> GetOwnerIdAsync(int productId)
 		{
@@ -1196,18 +1184,7 @@ namespace ProductAPI.Repository
 			}
 		}
 
-		//public async Task<bool> IsAuthorizedToCreateProduct(string userId)
-		//{
-		//	// Retrieve the user with the specified id
-		//	var user = await _db.Users.FindAsync(userId);
-		//	if (user == null)
-		//	{
-		//		return false;
-		//	}
-
-		//	// Check if the user has the "ProductCreator" role
-		//	return await _db.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.RoleId == "ProductCreator");
-		//}
+		
 
 	}
 }
