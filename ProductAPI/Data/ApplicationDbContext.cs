@@ -46,6 +46,21 @@ namespace ProductAPI.Data
 				.HasForeignKey(i => i.ProductId);
 
 			// End Set up relationships between entities section ...
+
+
+			modelBuilder.Entity<Product>()
+				.HasIndex(p => p.Name)
+				.HasDatabaseName("IX_Product_Name");
+			modelBuilder.Entity<Product>()
+				.HasIndex(p => p.Description)
+				.HasDatabaseName("IX_Product_Description");
+
+
+			modelBuilder.Entity<Product>()
+				.HasIndex(p => p.Name)
+				.HasDatabaseName("IX_Product_Name_FTS");
+
+
 			// tell Entity Framework to use the SQL function NOW() as the default value for the
 			// CreatedAt property when a new Product entity is added to the database. 
 			modelBuilder.Entity<Product>()
@@ -92,20 +107,40 @@ namespace ProductAPI.Data
 			// Add Seed Data
 			// Seed the database with dummy data for the categories
 			modelBuilder.Entity<Category>().HasData(
-				new Category { CategoryId = 1, Name = "Smart Home", Description = "Smart home devices and systems",
+				new Category
+				{
+					CategoryId = 1,
+					Name = "Smart Home",
+					Description = "Smart home devices and systems",
 					CreatedAt = DateTime.Now,
 					UpdatedAt = DateTime.Now
 				},
-				new Category { CategoryId = 2, Name = "Electronics", Description = "Electronic devices and gadgets",
+				new Category
+				{
+					CategoryId = 2,
+					Name = "Electronics",
+					Description = "Electronic devices and gadgets",
 					CreatedAt = DateTime.Now,
 					UpdatedAt = DateTime.Now
 				},
-				new Category { CategoryId = 3, Name = "Arduino", Description = "Arduino microcontroller boards and kits",
+				new Category
+				{
+					CategoryId = 3,
+					Name = "Arduino",
+					Description = "Arduino microcontroller boards and kits",
 					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now, ParentCategoryId = 1 },
-				new Category { CategoryId = 4, Name = "Accessories", Description = "Electronic accessories and peripherals",
+					UpdatedAt = DateTime.Now,
+					ParentCategoryId = 1
+				},
+				new Category
+				{
+					CategoryId = 4,
+					Name = "Accessories",
+					Description = "Electronic accessories and peripherals",
 					CreatedAt = DateTime.Now,
-					UpdatedAt = DateTime.Now, ParentCategoryId = 2 }
+					UpdatedAt = DateTime.Now,
+					ParentCategoryId = 2
+				}
 			);
 
 
@@ -312,6 +347,9 @@ namespace ProductAPI.Data
 					UpdatedAt = DateTime.Now
 				}
 			);
+
+
+
 		}
 	}
 }

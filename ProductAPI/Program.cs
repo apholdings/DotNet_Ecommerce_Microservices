@@ -41,6 +41,8 @@ builder.Services.AddVersionedApiExplorer(options =>
 	options.SubstituteApiVersionInUrl = true;
 });
 
+builder.Services.AddMemoryCache();
+
 // REPOSITORIES
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -80,6 +82,7 @@ builder.Services.AddSwaggerGen(options =>
 		}
 	});
 });
+
 
 var app = builder.Build();
 
